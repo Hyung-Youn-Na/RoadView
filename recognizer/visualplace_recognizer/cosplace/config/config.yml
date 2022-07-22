@@ -1,0 +1,9 @@
+backbone: resnet101
+infer_batch_size: 16
+num_workers: 8
+device: cuda
+fc_output_dim: 1024
+resume_model: path/to/weights # TODO: cosplace 모델 경로 입력
+seed: 0
+dataset_path: path/to/db # TODO: db 폴더 경로 입력 .npy 파일 입력시 미리 만들어진 descriptor를 읽어서 시간 절약
+query_path: path/to/query # TODO: query 폴더 경로 입력
