@@ -1,0 +1,10 @@
+backbone: resnet50
+checkpoint: /nfs_shared/STR_Data/graduate_project/ObjectDetection/Faster-RCNN/weights/model-11250.pth
+probability_threshold: 0.6
+image_min_side: 600
+image_max_side: 1000
+anchor_ratios: [(1, 2), (1, 1), (2, 1)]
+anchor_sizes: [128, 256, 512]
+pooler_mode: align
+rpn_pre_nms_top_n: 6000
+rpn_post_nms_top_n: 300

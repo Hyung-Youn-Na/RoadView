@@ -96,11 +96,11 @@ class RawDataset(data.Dataset):
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ])
 
-        self.dataset_paths = sorted(glob(os.path.join(self.dataset_folder, "**", "*.jpg"), recursive=True))
+        self.dataset_paths = sorted(glob(os.path.join(self.dataset_folder, "**", "*.png"), recursive=True))
 
         self.images_paths = [p for p in self.dataset_paths]
 
-        self.dataset_num = len(self.database_paths)
+        self.dataset_num = len(self.dataset_paths)
 
 
     def __getitem__(self, index):

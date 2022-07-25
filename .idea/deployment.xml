@@ -215,7 +215,7 @@
       <paths name="root@mlwiz.sogang.ac.kr:40000">
         <serverdata>
           <mappings>
-            <mapping deploy="/workspace" local="$PROJECT_DIR$" />
+            <mapping deploy="/" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>
