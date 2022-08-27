@@ -5,4 +5,4 @@ device: cuda
 fc_output_dim: 512
 resume_model: /nfs_shared/STR_Data/graduate_project/VisualPlaceRecognition/cosplace/weights/resnet101_512.pth # TODO: cosplace 모델 경로 입력
 seed: 0
-dataset_path: /nfs_shared/STR_Data/RoadView/sample3/파노라마_2/2021/ # TODO: db 폴더 경로 입력 .npy 파일 입력시 미리 만들어진 descriptor를 읽어서 시간 절약
+dataset_path: /nfs_shared/STR_Data/RoadView/data/database_no_panorama/ # TODO: db 폴더 경로 입력 .npy 파일 입력시 미리 만들어진 descriptor를 읽어서 시간 절약

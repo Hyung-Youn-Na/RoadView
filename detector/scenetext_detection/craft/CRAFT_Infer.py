@@ -109,8 +109,10 @@ class CRAFT_Infer:
         t1 = time.time()
 
         # Post-processing
-        boxes, polys = craft_utils.getDetBoxes(score_text, score_link, self.config['text_threshold'], self.config['link_threshold'], self.config['low_text'],
+        boxes, polys, confidences = craft_utils.getDetBoxes(score_text, score_link, self.config['text_threshold'], self.config['link_threshold'], self.config['low_text'],
                                                self.config['poly'])
+
+
 
         # coordinate adjustment
         boxes = craft_utils.adjustResultCoordinates(boxes, ratio_w, ratio_h)
@@ -121,13 +123,22 @@ class CRAFT_Infer:
         t1 = time.time() - t1
 
         # render results (optional)
-        render_img = score_text.copy()
-        render_img = np.hstack((render_img, score_link))
-        ret_score_text = imgproc.cvt2HeatmapImg(render_img)
+        # render_img = score_text.copy()
+        # render_img = np.hstack((render_img, score_link))
+        # ret_score_text = imgproc.cvt2HeatmapImg(render_img)
 
         if self.config['show_time']: print("\ninfer/postproc time : {:.3f}/{:.3f}".format(t0, t1))
 
-        return boxes, polys, ret_score_text
+        xy_format_bboxes = []
+        for bbox in boxes:
+
+            xmin = min(bbox[0][0], bbox[1][0], bbox[2][0], bbox[3][0])
+            xmax = max(bbox[0][0], bbox[1][0], bbox[2][0], bbox[3][0])
+            ymin = min(bbox[0][1], bbox[1][1], bbox[2][1], bbox[3][1])
+            ymax = max(bbox[0][1], bbox[1][1], bbox[2][1], bbox[3][1])
+            xy_format_bboxes.append([xmin,ymin,xmax,ymax])
+
+        return xy_format_bboxes, confidences
 
 
     def _parse_config(self):

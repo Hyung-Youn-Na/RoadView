@@ -60,7 +60,7 @@ class DeepText:
         opt = semi_opt(self.config)
 
         model = Model(opt)
-        print('model input parameters', self.config)
+        # print('model input parameters', self.config)
         model = torch.nn.DataParallel(model).to(self.device)
 
         # load model
@@ -74,6 +74,8 @@ class DeepText:
 
     def inference_by_image(self, pil_image_list):
 
+        pred_texts = []
+
         AlignCollate_demo = AlignCollate(imgH=self.config['imgH'], imgW=self.config['imgW'],
                                          keep_ratio_with_pad=self.config['PAD'])
         demo_data = ListDataset(pil_image_list=pil_image_list, config=self.config)  # use RawDataset
@@ -82,7 +84,7 @@ class DeepText:
             shuffle=False,
             num_workers=int(self.config['workers']),
             collate_fn=AlignCollate_demo, pin_memory=True)
-
+        tr_confidences = []
         with torch.no_grad():
             for image_tensors, image_path_list in demo_loader:
                 batch_size = image_tensors.size(0)
@@ -107,12 +109,10 @@ class DeepText:
                     _, preds_index = preds.max(2)
                     preds_str = self.converter.decode(preds_index, length_for_pred)
 
-                log = open(f'./log_demo_result.txt', 'a')
                 dashed_line = '-' * 80
                 head = f'{"image_path":25s}\t{"predicted_labels":25s}\tconfidence score'
 
                 print(f'{dashed_line}\n{head}\n{dashed_line}')
-                log.write(f'{dashed_line}\n{head}\n{dashed_line}\n')
 
                 preds_prob = F.softmax(preds, dim=2)
                 preds_max_prob, _ = preds_prob.max(dim=2)
@@ -124,16 +124,12 @@ class DeepText:
 
                     # calculate confidence score (= multiply of pred_max_prob)
                     confidence_score = pred_max_prob.cumprod(dim=0)[-1]
-
+                    pred_texts.append(pred)
+                    tr_confidences.append(confidence_score)
                     print(f'{img_name}\t{pred:25s}\t{confidence_score:0.4f}')
-                    log.write(f'{img_name}\t{pred:25s}\t{confidence_score:0.4f}\n')
+            return pred_texts, tr_confidences
 
-                log.close()
 
-        """
-        :param pil_image_list:
-        :return:
-        """
 
     def _parse_config(self):
         with open(os.path.join(self.path, 'config/config.yml'), 'r') as f:
@@ -145,7 +141,6 @@ class DeepText:
 
 if __name__ == '__main__':
 
-    """ vocab / character number configuration """
     test = DeepText()
     pil_image_list = []
     path_list = os.listdir('/workspace/recognizer/scenetext_recognizer/deeptext/demo_image/')
