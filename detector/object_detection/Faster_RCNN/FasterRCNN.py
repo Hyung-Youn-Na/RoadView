@@ -43,7 +43,6 @@ class FasterRCNN:
             # image = transforms.Image.open(path_to_input_image)
             image_tensor, scale = self.dataset.preprocess(pil_image, Config.IMAGE_MIN_SIDE, Config.IMAGE_MAX_SIDE)
 
-            print(image_tensor.shape)
 
             detection_bboxes, detection_classes, detection_probs, _ = \
                 self.model.eval().forward(image_tensor.unsqueeze(dim=0).cuda())

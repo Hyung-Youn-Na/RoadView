@@ -11,27 +11,7 @@ from utils import Logging, merge_filter, save_result
 
 class EdgeModule:
     path = os.path.dirname(os.path.abspath(__file__))
-    # event_model_class = {
-    #     "assault": AssaultEvent,
-    #     "falldown": FalldownEvent,
-    #     "kidnapping": KidnappingEvent,
-    #     "tailing": TailingEvent,
-    #     "wanderer": WandererEvent,
-    #     "obstacle": ObstacleEvent
-    # }
-    #TODO: 실험할 Object Detection들 목록 만들어서 넣기
-    # vr_models = {
-    #     'cosplace': "import ~~"
-    # }
-    # od_models = {
-    #
-    # }
-    # td_models = {
-    #
-    # }
-    # tr_models = {
-    #
-    # }
+
     def __init__(self):
         self.area_threshold = 0.5
         self.result = dict()
@@ -101,8 +81,6 @@ class EdgeModule:
 
             query_pil_corp_imgs.append(query_crop)
             pred_pil_crop_imgs.append(pred_crop)
-        print(len(query_pil_corp_imgs))
-        print(len(pred_pil_crop_imgs))
         query_texts, query_tr_confidences = self.tr_model.inference_by_image(query_pil_corp_imgs)
         pred_texts, pred_tr_confidences = self.tr_model.inference_by_image(pred_pil_crop_imgs)
 
@@ -113,6 +91,7 @@ class EdgeModule:
         self.result = result
 
     def inference_by_image_recognition_before(self, image):
+        print("VR model inference...")
         pred_img, pred_img_path, query_img, query_img_path = self.vr_model.inference_by_image(image)
 
         result = {
@@ -120,15 +99,17 @@ class EdgeModule:
             'pred_img_path': pred_img_path
         }
 
+        print("OD model inference...")
         query_img_object_bboxes = self.od_model.inference_by_image(query_img)
         pred_img_object_bboxes = self.od_model.inference_by_image(pred_img)
 
+        print("TD model inference...")
         query_img_text_bboxes, query_img_td_confidences = self.td_model.inference_by_image(query_img)
         pred_img_text_bboxes, pred_img_td_confidences = self.td_model.inference_by_image(pred_img)
 
-        query_img_text_groups = merge_filter.getFilteredTextGroup(query_img_object_bboxes,
+        query_img_text_groups = merge_filter.get_text_groups(query_img_object_bboxes,
                                                                                  query_img_text_bboxes)
-        pred_img_text_groups = merge_filter.getFilteredTextGroup(pred_img_object_bboxes,
+        pred_img_text_groups = merge_filter.get_text_groups(pred_img_object_bboxes,
                                                       pred_img_text_bboxes)
 
 
@@ -141,6 +122,7 @@ class EdgeModule:
         query_group_text_confidences = []
         pred_group_text_confidences = []
 
+        print("TR model inference...")
         for query_text_group, pred_text_group in zip(query_img_text_groups, pred_img_text_groups):
             query_pil_corp_imgs = []
             pred_pil_crop_imgs = []
@@ -149,6 +131,7 @@ class EdgeModule:
                 pred_crop = pred_img.crop(tuple(pred_text_bbox))
                 query_pil_corp_imgs.append(query_crop)
                 pred_pil_crop_imgs.append(pred_crop)
+            print(query_text_group, pred_text_group)
             query_texts, query_tr_confidences = self.tr_model.inference_by_image(query_pil_corp_imgs)
             pred_texts, pred_tr_confidences = self.tr_model.inference_by_image(pred_pil_crop_imgs)
 
@@ -270,5 +253,6 @@ if __name__ == '__main__':
         print(path)
         if '.png' not in path and '.jpg' not in path:
             continue
-        main.inference_by_image(os.path.join(q, path))
-        main.plot_result(nowDate_result_path, td_result_path=td_result_path, od_result_path=od_result_path)
+        main.inference_by_image_recognition_before(os.path.join(q, path))
+        # main.plot_result(nowDate_result_path, td_result_path=td_result_path, od_result_path=od_result_path)
+        print(main.result)

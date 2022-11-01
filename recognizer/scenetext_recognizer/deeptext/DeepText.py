@@ -64,7 +64,7 @@ class DeepText:
         model = torch.nn.DataParallel(model).to(self.device)
 
         # load model
-        print('loading pretrained model from %s' % self.config['saved_model'])
+        print('loading scene text recognizer pretrained model from %s' % self.config['saved_model'])
         model.load_state_dict(torch.load(self.config['saved_model'], map_location=self.device))
 
         model.eval()
@@ -110,9 +110,9 @@ class DeepText:
                     preds_str = self.converter.decode(preds_index, length_for_pred)
 
                 dashed_line = '-' * 80
-                head = f'{"image_path":25s}\t{"predicted_labels":25s}\tconfidence score'
+                # head = f'{"image_path":25s}\t{"predicted_labels":25s}\tconfidence score'
 
-                print(f'{dashed_line}\n{head}\n{dashed_line}')
+                # print(f'{dashed_line}\n{head}\n{dashed_line}')
 
                 preds_prob = F.softmax(preds, dim=2)
                 preds_max_prob, _ = preds_prob.max(dim=2)
@@ -123,10 +123,14 @@ class DeepText:
                         pred_max_prob = pred_max_prob[:pred_EOS]
 
                     # calculate confidence score (= multiply of pred_max_prob)
-                    confidence_score = pred_max_prob.cumprod(dim=0)[-1]
+                    if len(pred_max_prob.cumprod(dim=0)) == 0:
+                        pred = ''
+                        confidence_score = 0.0
+                    else:
+                        confidence_score = pred_max_prob.cumprod(dim=0)[-1]
                     pred_texts.append(pred)
                     tr_confidences.append(confidence_score)
-                    print(f'{img_name}\t{pred:25s}\t{confidence_score:0.4f}')
+                    # print(f'{img_name}\t{pred:25s}\t{confidence_score:0.4f}')
             return pred_texts, tr_confidences
 
 

@@ -1,13 +1,13 @@
 import numpy as np
 
-def getAverageArea(object_bboxes, text_bboxes):
+def get_average_area(object_bboxes, text_bboxes):
     text_groups = []
     avg_areas = []
     for obj_bbox in object_bboxes:
         text_area_sum = 0.0
         text_group = []
         for n, text_bbox in enumerate(text_bboxes):
-            if getInnerTextRegionRatio(obj_bbox, text_bbox) > 0.75:
+            if get_inner_text_region_ratio(obj_bbox, text_bbox) > 0.75:
                 textBbox_area = (text_bbox[2] - text_bbox[0] + 1) * (text_bbox[3] - text_bbox[1] + 1)
                 text_area_sum += textBbox_area
                 text_group.append(n)
@@ -19,7 +19,7 @@ def getAverageArea(object_bboxes, text_bboxes):
     return text_groups, avg_areas
 
 
-def getInnerTextRegionRatio(objectBbox, textBbox):
+def get_inner_text_region_ratio(objectBbox, textBbox):
     textBbox_area = (textBbox[2] - textBbox[0] + 1) * (textBbox[3] - textBbox[1] + 1)
 
     x1 = max(objectBbox[0], textBbox[0])
@@ -38,7 +38,7 @@ def getInnerTextRegionRatio(objectBbox, textBbox):
 
 def merge_and_filter_bboxes(object_bboxes, text_bboxes,
                             text_detection_confidences):
-    text_groups, avg_areas = getAverageArea(object_bboxes, text_bboxes)
+    text_groups, avg_areas = get_average_area(object_bboxes, text_bboxes)
     group_text_bboxes = []
     for object_bbox, object_text_group, object_avg_area in zip(object_bboxes,
                                                                text_groups, avg_areas):
@@ -71,37 +71,58 @@ def merge_and_filter_bboxes(object_bboxes, text_bboxes,
 
     return group_text_bboxes
 
-def getFilteredTextGroup(object_bboxes, text_bboxes):
+def get_text_groups(object_bboxes, text_bboxes):
     text_groups = []
-    avg_areas = []
-    filtered_text_groups = []
     for obj_bbox in object_bboxes:
-        text_area_sum = 0.0
         text_group = []
-        filtered_text_group = []
         for n, text_bbox in enumerate(text_bboxes):
-            if getInnerTextRegionRatio(obj_bbox, text_bbox) > 0.75:
-                textBbox_area = (text_bbox[2] - text_bbox[0] + 1) * (text_bbox[3] - text_bbox[1] + 1)
-                text_area_sum += textBbox_area
-                text_group.append(n)
-        if len(text_group) != 0:
-            avg_areas.append(text_area_sum / len(text_group))
-        else:
-            avg_areas.append(0.0)
-        for idx in text_group:
-            in_ganpan_text_bbox = text_bbox[idx]
-            ganpan_text_bbox_area = (in_ganpan_text_bbox[2] - in_ganpan_text_bbox[0] + 1) *\
-                                    (in_ganpan_text_bbox[3] - in_ganpan_text_bbox[1] + 1)
-            if ganpan_text_bbox_area > text_area_sum / len(text_group):
-                filtered_text_group.append(idx)
-        filtered_text_groups.append(filtered_text_group)
+            if get_inner_text_region_ratio(obj_bbox, text_bbox) > 0.75:
+                text_group.append(text_bbox)
+        text_groups.append(text_group)
+    return text_groups
 
-    return filtered_text_groups
+# def get_text_groups(object_bboxes, text_bboxes):
+#     roi_list = []
+#     text_groups = []
+#     for obj_bbox in object_bboxes:
+#         roi_dic = {
+#             'points': obj_bbox
+#         }
+#
+#         text_group = []
+#         for n, text_bbox in enumerate(text_bboxes):
+#             if get_inner_text_region_ratio(obj_bbox, text_bbox) > 0.75:
+#                 text_group.append(text_bbox)
+#         text_groups.append(text_group)
+#     return text_groups
 
-# def merge_text_recognition_result(result):
-#     for query_img_text_group, pred_img_text_group, query_group_text, pred_group_text,\
-#         query_group_text_confidence, pred_group_text_confidence, in zip(result['query_img_text_groups'],
-#         result['pred_img_text_groups'], result['query_group_texts'], result['pred_group_text'],
-#         result['query_group_text_confidences'], result['pred_group_text_confidence']):
+# def getFilteredTextGroup(object_bboxes, text_bboxes):
+#     text_groups = []
+#     avg_areas = []
+#     filtered_text_groups = []
+#     for obj_bbox in object_bboxes:
+#         text_area_sum = 0.0
+#         text_group = []
+#         filtered_text_group = []
+#         for n, text_bbox in enumerate(text_bboxes):
+#             if get_inner_text_region_ratio(obj_bbox, text_bbox) > 0.75:
+#                 textBbox_area = (text_bbox[2] - text_bbox[0] + 1) * (text_bbox[3] - text_bbox[1] + 1)
+#                 text_area_sum += textBbox_area
+#                 text_group.append(n)
+#         if len(text_group) != 0:
+#             avg_areas.append(text_area_sum / len(text_group))
+#         else:
+#             avg_areas.append(0.0)
+#         for idx in text_group:
+#             in_ganpan_text_bbox = text_bbox[idx]
+#             ganpan_text_bbox_area = (in_ganpan_text_bbox[2] - in_ganpan_text_bbox[0] + 1) *\
+#                                     (in_ganpan_text_bbox[3] - in_ganpan_text_bbox[1] + 1)
+#             if ganpan_text_bbox_area > text_area_sum / len(text_group):
+#                 filtered_text_group.append(idx)
+#         filtered_text_groups.append(filtered_text_group)
+#
+#     return filtered_text_groups
+
+
 
 

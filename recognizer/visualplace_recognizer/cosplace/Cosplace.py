@@ -91,7 +91,7 @@ class Cosplace:
                                                  batch_size=self.config['infer_batch_size'],
                                                  pin_memory=(self.config['device'] == "cuda"))
                 query_descriptor = np.empty((len(query_ds), self.config['fc_output_dim']), dtype="float32")
-                for images, indices in tqdm(database_dataloader, ncols=100):
+                for images, indices in database_dataloader:
                     descriptors = self.model(images.to(self.config['device']))
                     descriptors = descriptors.cpu().numpy()
                     query_descriptor[indices.numpy(), :] = descriptors
@@ -101,7 +101,6 @@ class Cosplace:
         faiss_index.add(self.database_descriptors)
         _, prediction = faiss_index.search(query_descriptor, 1)
 
-        print(prediction)
         pred_img_path = self.database_ds.get_datapaths()[prediction[0][0]]
 
         if not os.path.exists(pred_img_path):
