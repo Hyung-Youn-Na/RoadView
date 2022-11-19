@@ -1,0 +1,5 @@
+conf: 0.2
+nms: 0.45
+gpu: 0,1
+is_batch: False
+model_path: /nfs_shared/STR_Data/graduate_project/ObjectDetection/yolov7/weights/best.pt
