@@ -99,15 +99,20 @@ class DeepText:
                     # Select max probabilty (greedy decoding) then decode index to character
                     preds_size = torch.IntTensor([preds.size(1)] * batch_size)
                     _, preds_index = preds.max(2)
+
                     # preds_index = preds_index.view(-1)
                     preds_str = self.converter.decode(preds_index, preds_size)
 
                 else:
                     preds = self.model(image, text_for_pred, is_train=False)
-
+                    # print(preds.shape)
+                    _, preds_top10 = preds.topk(10, 2)
+                    preds_top2 = preds_top10[:,:,3]
                     # select max probabilty (greedy decoding) then decode index to character
                     _, preds_index = preds.max(2)
                     preds_str = self.converter.decode(preds_index, length_for_pred)
+                    preds_dummpy = self.converter.decode(preds_top2, length_for_pred)
+                    # print(preds_str, preds_dummpy)
 
                 dashed_line = '-' * 80
                 # head = f'{"image_path":25s}\t{"predicted_labels":25s}\tconfidence score'

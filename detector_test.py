@@ -39,7 +39,6 @@ class EdgeModule:
         return od_option, td_option, tr_option
 
     def load_models(self):
-        od_model = FasterRCNN()
         td_model = CRAFT_Infer()
         tr_model = DeepText()
 
@@ -52,7 +51,7 @@ class EdgeModule:
 
 
 
-        return od_model, td_model, tr_model, lg_model
+        return td_model, tr_model, lg_model
 
     def inference_by_image_recognition_before(self, image):
         result = {
