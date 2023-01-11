@@ -112,11 +112,33 @@ class CRAFT_Infer:
         boxes, polys, confidences = craft_utils.getDetBoxes(score_text, score_link, self.config['text_threshold'], self.config['link_threshold'], self.config['low_text'],
                                                self.config['poly'])
 
+        if self.config['char_bbox']:
+            char_boxes, char_polys, char_confidences = craft_utils.getDetBoxes(score_text, score_link, self.config['text_threshold'],
+                                                                self.config['link_threshold'], self.config['low_text'],
+                                                                self.config['poly'])
 
+            char_boxes = craft_utils.adjustResultCoordinates(char_boxes, ratio_w, ratio_h)
+            char_polys = craft_utils.adjustResultCoordinates(char_polys, ratio_w, ratio_h)
+
+            for k in range(len(char_polys)):
+                if char_polys[k] is None: char_polys[k] = char_boxes[k]
+
+            char_xy_format_bboxes = []
+            for bbox in boxes:
+                xmin = min(bbox[0][0], bbox[1][0], bbox[2][0], bbox[3][0])
+                xmax = max(bbox[0][0], bbox[1][0], bbox[2][0], bbox[3][0])
+                ymin = min(bbox[0][1], bbox[1][1], bbox[2][1], bbox[3][1])
+                ymax = max(bbox[0][1], bbox[1][1], bbox[2][1], bbox[3][1])
+                char_xy_format_bboxes.append([xmin, ymin, xmax, ymax])
+
+        else:
+            char_xy_format_bboxes = None
+            char_confidences = None
 
         # coordinate adjustment
         boxes = craft_utils.adjustResultCoordinates(boxes, ratio_w, ratio_h)
         polys = craft_utils.adjustResultCoordinates(polys, ratio_w, ratio_h)
+
         for k in range(len(polys)):
             if polys[k] is None: polys[k] = boxes[k]
 
@@ -138,7 +160,7 @@ class CRAFT_Infer:
             ymax = max(bbox[0][1], bbox[1][1], bbox[2][1], bbox[3][1])
             xy_format_bboxes.append([xmin,ymin,xmax,ymax])
 
-        return xy_format_bboxes, confidences
+        return xy_format_bboxes, confidences, char_xy_format_bboxes, char_confidences
 
 
     def _parse_config(self):

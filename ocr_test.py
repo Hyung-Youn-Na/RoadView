@@ -7,7 +7,6 @@ import pprint
 import numpy
 
 from PIL import Image, ImageDraw, ImageFont
-from detector.object_detection.Faster_RCNN.FasterRCNN import FasterRCNN
 from detector.scenetext_detection.craft.CRAFT_Infer import CRAFT_Infer
 from recognizer.scenetext_recognizer.deeptext.DeepText import DeepText
 
@@ -47,7 +46,7 @@ class EdgeModule:
         img = Image.open(image)
 
         print('TD model inference...')
-        img_text_bboxes, img_td_confidences = self.td_model.inference_by_image(img)
+        img_text_bboxes, img_td_confidences, _, _ = self.td_model.inference_by_image(img)
 
         result['img_text_bboxes'] = img_text_bboxes
 
@@ -56,7 +55,7 @@ class EdgeModule:
         print('TR model inference...')
         for text_bbox in img_text_bboxes:
             crop_img = img.crop(tuple(text_bbox))
-            texts, tr_confidences = self.tr_model.inference_by_image([crop_img])
+            texts, tr_confidences, _ = self.tr_model.inference_by_image([crop_img])
             img_group_texts.extend(texts)
             img_group_text_confidences.extend(tr_confidences)
 
@@ -80,7 +79,7 @@ class EdgeModule:
 
         fontpath = "/nfs_shared/STR_Data/graduate_project/utils/Gulim.ttf"
         font = ImageFont.truetype(fontpath, 50)
-        font_small = ImageFont.truetype(fontpath, 20)
+        font_small = ImageFont.truetype(fontpath, 30)
 
         text = []
 
@@ -88,7 +87,7 @@ class EdgeModule:
             zip(self.result['img_text_bboxes'], self.result['img_group_texts']):
             print(text)
             image_draw.rectangle(((text_bbox[0], text_bbox[1]), (text_bbox[2], text_bbox[3])), outline='red', width=3)
-            text_position = (text_bbox[0], max(0, text_bbox[1]-20))
+            text_position = (text_bbox[0], max(0, text_bbox[1]-30))
             text_left, text_top, text_right, text_bottom = image_draw.textbbox(text_position, text, font=font_small)
             image_draw.rectangle((text_left - 5, text_top - 5, text_right + 5, text_bottom + 5), fill="red")
             image_draw.text(text_position, text, font=font_small, fill="black")
@@ -130,12 +129,12 @@ if __name__ == '__main__':
         os.mkdir(od_result_path)
 
     main = EdgeModule()
-    q = '/nfs_shared/STR_Data/RoadView/img/'
+    q = '/nfs_shared/STR_Data/graduate_project/data/test_img_yolo/'
     q_paths = os.listdir(q)
-    for path in q_paths[:1]:
+    for path in q_paths:
         print(path)
         if '.png' not in path and '.jpg' not in path:
             continue
         main.inference_by_image_recognition_before(os.path.join(q, path))
-        # main.plot_result(nowDate_result_path)
+        main.plot_result(td_result_path)
         # pprint.pprint(main.result)

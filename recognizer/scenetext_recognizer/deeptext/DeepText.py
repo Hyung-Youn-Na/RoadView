@@ -33,7 +33,9 @@ class DeepText:
 
 
         if self.config['sensitive']:
-            self.config['sensitive'] += string.printable[:-6]
+            with open(self.config['character'], 'r') as cf:
+                cf_str = cf.read().rstrip()
+                self.config['character'] = cf_str
         else:
             self.config['character'] = line + '0123456789abcdefghijklmnopqrstuvwxyz'
 
@@ -104,15 +106,19 @@ class DeepText:
                     preds_str = self.converter.decode(preds_index, preds_size)
 
                 else:
+                    preds_top5_str = []
                     preds = self.model(image, text_for_pred, is_train=False)
                     # print(preds.shape)
                     _, preds_top10 = preds.topk(10, 2)
-                    preds_top2 = preds_top10[:,:,3]
+
                     # select max probabilty (greedy decoding) then decode index to character
                     _, preds_index = preds.max(2)
                     preds_str = self.converter.decode(preds_index, length_for_pred)
-                    preds_dummpy = self.converter.decode(preds_top2, length_for_pred)
-                    # print(preds_str, preds_dummpy)
+                    for i in range(5):
+                        preds_top5 = preds_top10[:, :,i]
+                        preds_top_i = self.converter.decode(preds_top5, length_for_pred)
+                        preds_top5_str.append(preds_top_i[0])
+                    # print(preds_str, preds_top5_str)
 
                 dashed_line = '-' * 80
                 # head = f'{"image_path":25s}\t{"predicted_labels":25s}\tconfidence score'
@@ -136,7 +142,7 @@ class DeepText:
                     pred_texts.append(pred)
                     tr_confidences.append(confidence_score)
                     # print(f'{img_name}\t{pred:25s}\t{confidence_score:0.4f}')
-            return pred_texts, tr_confidences
+            return pred_texts, tr_confidences, preds_top5_str
 
 
 

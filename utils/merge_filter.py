@@ -1,5 +1,24 @@
 import numpy as np
 
+def cmp_text_bbox(a, b):
+    a_xmin, a_ymin, a_xmax, a_ymax = a
+    b_xmin, b_ymin, b_xmax, b_ymax = b
+
+    b_ycenter = (b_ymax + b_ymin) / 2
+
+    # a의 가장 위의 좌표가 b의 가장 아래 좌표보다 아래에 있는 경우
+    if a_ymin > b_ycenter:
+        return 1
+    else:
+        # a의 가장 왼쪽 좌표가 b의 가장 왼쪽 좌표보다 오른쪽에 있는 경우
+        if a_xmin > b_xmin:
+            return 1
+        elif a_xmin < b_xmin:
+            return -1
+        elif a_xmin == b_xmin:
+            return 0
+
+
 def get_average_area(object_bboxes, text_bboxes):
     text_groups = []
     avg_areas = []
@@ -18,6 +37,16 @@ def get_average_area(object_bboxes, text_bboxes):
         text_groups.append(text_group)
     return text_groups, avg_areas
 
+def get_text_average_area(text_bboxes):
+    avg_area = 0.0
+    text_area_sum = 0.0
+    for n, text_bbox in enumerate(text_bboxes):
+        textBbox_area = (text_bbox[2] - text_bbox[0] + 1) * (text_bbox[3] - text_bbox[1] + 1)
+        text_area_sum += textBbox_area
+    if len(text_bboxes) != 0:
+        avg_area = text_area_sum / len(text_bboxes)
+
+    return avg_area
 
 def get_inner_text_region_ratio(objectBbox, textBbox):
     textBbox_area = (textBbox[2] - textBbox[0] + 1) * (textBbox[3] - textBbox[1] + 1)
