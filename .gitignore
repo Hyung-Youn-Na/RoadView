@@ -1,1 +1,7 @@
 .idea
+detector_test.py
+main.py
+ocr_test.py
+ocr_with_grufc.py
+ocr_with_lm.py
+.language
